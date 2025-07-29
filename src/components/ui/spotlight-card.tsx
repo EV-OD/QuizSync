@@ -21,9 +21,9 @@ const glowColorMap = {
 };
 
 const sizeMap = {
-  sm: 'w-48 h-64',
-  md: 'w-64 h-80',
-  lg: 'w-80 h-96'
+  sm: 'w-48 h-auto',
+  md: 'w-64 h-auto',
+  lg: 'w-80 h-auto'
 };
 
 const GlowCard: React.FC<GlowCardProps> = ({ 
@@ -168,7 +168,6 @@ const GlowCard: React.FC<GlowCardProps> = ({
         style={getInlineStyles()}
         className={`
           ${getSizeClasses()}
-          ${!customSize ? 'aspect-[3/4]' : ''}
           rounded-2xl 
           relative 
           grid 
@@ -188,3 +187,4 @@ const GlowCard: React.FC<GlowCardProps> = ({
 };
 
 export { GlowCard }
+    
