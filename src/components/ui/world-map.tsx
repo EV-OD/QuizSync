@@ -95,7 +95,7 @@ export default function WorldMap({
               className="pointer-events-auto"
             >
               <div className="w-16 h-16 rounded-full bg-background/50 backdrop-blur-sm border border-primary/50 flex items-center justify-center p-2 shadow-lg">
-                <Image src={logo.imageUrl} alt="Logo" width={48} height={48} className="object-contain"/>
+                <Image src={logo.imageUrl} alt="Logo" width={48} height={48} className="object-contain dark:[filter:invert(1)_hue-rotate(189deg)_brightness(2)]"/>
               </div>
             </div>
           )
