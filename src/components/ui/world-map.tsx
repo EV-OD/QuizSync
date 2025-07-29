@@ -18,18 +18,20 @@ interface MapProps {
   pins?: Pin[];
   logo?: Logo;
   pinColor?: string;
+  dotColor?: string;
 }
 
 export default function WorldMap({
   pins = [],
   logo,
   pinColor = "hsl(var(--primary))",
+  dotColor = "#FFFFFF40", // Changed for dark mode visibility
 }: MapProps) {
   const map = new DottedMap({ height: 100, grid: "diagonal" });
 
   const svgMap = map.getSVG({
     radius: 0.22,
-    color: "#00000040",
+    color: dotColor,
     shape: "circle",
     backgroundColor: "transparent",
   });
