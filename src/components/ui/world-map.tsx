@@ -1,5 +1,7 @@
+"use client";
+
 import DottedMap from "dotted-map";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 
 interface Pin {
@@ -28,6 +30,26 @@ export default function WorldMap({
   dotColor = "#FFFFFF40", // Changed for dark mode visibility
 }: MapProps) {
   const map = new DottedMap({ height: 100, grid: "diagonal" });
+  const [viewBox, setViewBox] = useState("0 0 800 400");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const isMobileView = window.innerWidth < 768;
+      setIsMobile(isMobileView);
+      if (isMobileView) {
+        // Zoom in on Nepal: x, y, width, height
+        setViewBox("450 80 300 150");
+      } else {
+        setViewBox("0 0 800 400");
+      }
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   const svgMap = map.getSVG({
     radius: 0.22,
@@ -43,19 +65,20 @@ export default function WorldMap({
   };
 
   return (
-    <div className="w-full h-full absolute top-20 left-0 right-0 bottom-0">
+    <div className="w-full h-full absolute top-0 md:top-20 left-0 right-0 bottom-0">
       <div className="w-full h-full relative">
         <img
           src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
-          className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
+          className="h-full w-full object-cover object-center md:object-contain [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
           alt="world map"
           height="495"
           width="1056"
           draggable={false}
         />
         <svg
-          viewBox="0 0 800 400"
+          viewBox={viewBox}
           className="w-full h-full absolute inset-0 pointer-events-none select-none"
+          preserveAspectRatio="xMidYMid slice"
         >
           {pins.map((pin, i) => {
             const point = projectPoint(pin.lat, pin.lng);
@@ -88,11 +111,12 @@ export default function WorldMap({
              <div
               style={{
                 position: 'absolute',
-                left: `${(point.x / 800) * 100}%`,
-                top: `calc(${(point.y / 400) * 100}% + 50px)`,
-                transform: 'translate(-50%, -50%)',
+                left: `${(point.x / (isMobile ? 300 : 800)) * (isMobile ? 250 : 100)}%`,
+                top: `calc(${(point.y / (isMobile ? 150 : 400)) * (isMobile ? 150 : 100)}% + ${isMobile ? 0 : 50}px)`,
+                transform: `translate(-${isMobile ? 10 : 50}%, -${isMobile ? 10 : 50}%) scale(${isMobile ? 0.8 : 1})`,
+                 visibility: isMobile ? 'hidden' : 'visible'
               }}
-              className="pointer-events-auto"
+              className="pointer-events-auto transition-all"
             >
               <div className="w-16 h-16 rounded-full bg-background/50 backdrop-blur-sm border border-primary/50 flex items-center justify-center p-2 shadow-lg">
                 <Image src={logo.imageUrl} alt="Logo" width={48} height={48} className="object-contain dark:[filter:invert(1)_hue-rotate(189deg)_brightness(2)]"/>
