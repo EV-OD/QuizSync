@@ -350,9 +350,9 @@ export default function QuizPage() {
     <AntiCheatWrapper>
        <div className="flex flex-col min-h-screen bg-muted/40">
         <Header />
-        <main className="flex-1 flex flex-col items-center justify-center p-4">
-          <div className="w-full max-w-2xl space-y-6">
-            <div className="flex justify-between items-center font-mono text-sm text-muted-foreground">
+        <main className="flex-1 flex flex-col items-center justify-center p-4 pt-24 md:pt-32">
+          <div className="w-full max-w-2xl space-y-4 md:space-y-6">
+            <div className="flex justify-between items-center font-mono text-xs md:text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                     <CheckSquare className="h-5 w-5 text-primary" />
                     <span>Question {currentQuestionIndex + 1} of {userQuestions.length}</span>
@@ -373,16 +373,16 @@ export default function QuizPage() {
                     transition={{ duration: 0.3 }}
                  >
                     <Card className="shadow-lg">
-                      <CardHeader className="relative border-b">
-                        <CardTitle className="font-headline text-2xl pr-20">{currentQuestion.text}</CardTitle>
-                         <div className="absolute top-4 right-4 bg-primary text-primary-foreground rounded-full h-16 w-16 flex items-center justify-center font-bold text-2xl font-mono shadow-inner">
+                      <CardHeader className="relative border-b p-4 md:p-6">
+                        <CardTitle className="font-headline text-xl md:text-2xl pr-16 md:pr-20">{currentQuestion.text}</CardTitle>
+                         <div className="absolute top-3 right-3 md:top-4 md:right-4 bg-primary text-primary-foreground rounded-full h-12 w-12 md:h-16 md:w-16 flex items-center justify-center font-bold text-xl md:text-2xl font-mono shadow-inner">
                             {timeLeft}
                         </div>
                       </CardHeader>
                       <CardContent className="pt-6">
                         <RadioGroup 
                             onValueChange={(val) => handleAnswerSelect(currentQuestion.id, val)} 
-                            className="space-y-4"
+                            className="space-y-3"
                             value={answers[currentQuestion.id] || ""}
                             key={currentQuestion.id}
                         >
@@ -390,10 +390,10 @@ export default function QuizPage() {
                              <Label 
                                 htmlFor={`option-${index}`} 
                                 key={index}
-                                className="flex items-center space-x-4 p-4 rounded-lg border bg-background hover:bg-accent/50 has-[input:checked]:bg-accent has-[input:checked]:border-accent-foreground cursor-pointer transition-colors"
+                                className="flex items-center space-x-4 p-3 md:p-4 rounded-lg border bg-background hover:bg-accent/50 has-[input:checked]:bg-accent has-[input:checked]:border-accent-foreground cursor-pointer transition-colors"
                             >
                                 <RadioGroupItem value={option} id={`option-${index}`} className="h-5 w-5"/>
-                                <span className="text-base font-medium">{option}</span>
+                                <span className="text-sm md:text-base font-medium">{option}</span>
                             </Label>
                           ))}
                         </RadioGroup>
@@ -407,3 +407,4 @@ export default function QuizPage() {
     </AntiCheatWrapper>
   );
 }
+
