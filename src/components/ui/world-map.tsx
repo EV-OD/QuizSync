@@ -80,7 +80,7 @@ export default function WorldMap({
           className="w-full h-full absolute inset-0 pointer-events-none select-none"
           preserveAspectRatio="xMidYMid slice"
         >
-          {pins.map((pin, i) => {
+          {!isMobile && pins.map((pin, i) => {
             const point = projectPoint(pin.lat, pin.lng);
             return (
               <g key={`pin-group-${i}`} transform={`translate(${point.x}, ${point.y})`}>
@@ -105,15 +105,15 @@ export default function WorldMap({
             );
           })}
         </svg>
-        {logo && (() => {
+        {logo && !isMobile && (() => {
           const point = projectPoint(logo.lat, logo.lng);
           return (
              <div
               style={{
                 position: 'absolute',
-                left: `${(point.x / (isMobile ? 300 : 800)) * (isMobile ? 250 : 100)}%`,
-                top: `calc(${(point.y / (isMobile ? 150 : 400)) * (isMobile ? 150 : 100)}% + ${isMobile ? 0 : 50}px)`,
-                transform: `translate(-${isMobile ? 10 : 50}%, -${isMobile ? 10 : 50}%) scale(${isMobile ? 0.8 : 1})`,
+                left: `${(point.x / 800) * 100}%`,
+                top: `calc(${(point.y / 400) * 100}% + 50px)`,
+                transform: `translate(-50%, -50%)`,
                  visibility: isMobile ? 'hidden' : 'visible'
               }}
               className="pointer-events-auto transition-all"
