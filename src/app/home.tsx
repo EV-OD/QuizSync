@@ -146,7 +146,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mx-auto grid max-w-5xl items-start gap-8 py-12 sm:grid-cols-2 md:gap-12 lg:grid-cols-3">
-                <GlowCard glowColor="purple" className="p-6">
+                <GlowCard glowColor="purple">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
                         <UploadCloud className="h-6 w-6" />
@@ -157,7 +157,7 @@ export default function Home() {
                     Engage with experts and peers to refine your research ideas.
                   </p>
                 </GlowCard>
-                <GlowCard glowColor="purple" className="p-6">
+                <GlowCard glowColor="purple">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
                       <BookUser className="h-6 w-6" />
@@ -168,7 +168,7 @@ export default function Home() {
                     Learn the fundamentals by composing a comprehensive review paper.
                   </p>
                 </GlowCard>
-                <GlowCard glowColor="purple" className="p-6">
+                <GlowCard glowColor="purple">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
                       <Zap className="h-6 w-6" />
@@ -179,7 +179,7 @@ export default function Home() {
                     Brainstorm and develop innovative research concepts in a competitive environment.
                   </p>
                 </GlowCard>
-                 <GlowCard glowColor="purple" className="p-6">
+                 <GlowCard glowColor="purple">
                   <div className="flex items-center gap-4">
                      <div className="bg-primary text-primary-foreground p-3 rounded-full">
                        <CheckCircle className="h-6 w-6" />
@@ -190,7 +190,7 @@ export default function Home() {
                     Culminate your work into a final, polished research paper ready for publication.
                   </p>
                 </GlowCard>
-                <GlowCard glowColor="purple" className="p-6">
+                <GlowCard glowColor="purple">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
                       <Wallet className="h-6 w-6" />
@@ -201,7 +201,7 @@ export default function Home() {
                     Compete for a prize pool rewarding the most outstanding research.
                   </p>
                 </GlowCard>
-                 <GlowCard glowColor="purple" className="p-6">
+                 <GlowCard glowColor="purple">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
                       <Repeat className="h-6 w-6" />
