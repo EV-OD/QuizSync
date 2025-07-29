@@ -77,7 +77,7 @@ export default function WorldMap({
         />
         <svg
           viewBox={viewBox}
-          className="w-full h-full absolute inset-0 pointer-events-none select-none"
+          className="w-full h-full absolute z-10 inset-0 pointer-events-none select-none"
           preserveAspectRatio="xMidYMid slice"
         >
           {!isMobile && pins.map((pin, i) => {
@@ -116,7 +116,7 @@ export default function WorldMap({
                 transform: `translate(-50%, -50%)`,
                  visibility: isMobile ? 'hidden' : 'visible'
               }}
-              className="pointer-events-auto transition-all"
+              className="pointer-events-auto transition-all z-10"
             >
               <div className="w-16 h-16 rounded-full bg-background/50 backdrop-blur-sm border border-primary/50 flex items-center justify-center p-2 shadow-lg">
                 <Image src={logo.imageUrl} alt="Logo" width={48} height={48} className="object-contain dark:[filter:invert(1)_hue-rotate(189deg)_brightness(2)]"/>

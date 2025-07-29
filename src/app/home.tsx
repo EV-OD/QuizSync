@@ -83,6 +83,7 @@ export default function Home() {
               lng: 85.3240,
             }}
           />
+          <div className="absolute inset-0  backdrop-blur-[2px] md:backdrop-blur-[1px]"></div>
            <div className="absolute inset-0 [mask-image:radial-gradient(at_40%_50%,white_0%,transparent_60%)] md:[mask-image:radial-gradient(at_40%_50%,white_0%,transparent_40%)] backdrop-blur-md"></div>
            <div className="container px-4 md:px-6 text-left relative z-10">
             <div className="max-w-3xl">
