@@ -1,3 +1,4 @@
+
 import { db } from './firebase';
 import { collection, doc, getDocs, writeBatch, runTransaction, onSnapshot, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import type { QuizState, Question, User, LastResult } from './types';
@@ -119,6 +120,18 @@ export const store = {
         listeners.delete(listener);
         unsubscribes.forEach(unsub => unsub());
     };
+  },
+  addQuestion: async (question: Question) => {
+    const docRef = doc(db, 'questions', question.id.toString());
+    await setDoc(docRef, question);
+  },
+  addUser: async (user: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions'>, questionIds: number[]) => {
+    const batch = writeBatch(db);
+    const userDocRef = doc(db, 'users', user.id);
+    batch.set(userDocRef, { name: user.name, researchPaperId: user.researchPaperId, id: user.id });
+    const assignmentDocRef = doc(db, 'userAssignments', user.id);
+    batch.set(assignmentDocRef, { questionIds });
+    await batch.commit();
   },
   loadQuestionsFromCsv: async (csvContent: string) => {
     const questions = processQuestionsCsv(csvContent);

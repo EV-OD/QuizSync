@@ -1,6 +1,7 @@
+
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,14 +21,64 @@ import {
 } from "@/components/ui/table";
 import { useQuizState } from "@/hooks/use-quiz-state";
 import { store } from "@/lib/quiz-store";
-import { FileUp, BookMarked } from "lucide-react";
+import { FileUp, BookMarked, PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const questionSchema = z.object({
+  id: z.coerce.number().min(1, "ID is required"),
+  text: z.string().min(1, "Question text is required"),
+  researchPaperId: z.string().min(1, "Research Paper ID is required"),
+  option1: z.string().min(1, "Option 1 is required"),
+  option2: z.string().min(1, "Option 2 is required"),
+  option3: z.string().min(1, "Option 3 is required"),
+  option4: z.string().min(1, "Option 4 is required"),
+  correctAnswer: z.string().min(1, "Correct answer is required"),
+});
 
 export default function QuestionsPage() {
   const { questions } = useQuizState();
   const { toast } = useToast();
   const questionsFileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isAddQuestionDialogOpen, setAddQuestionDialogOpen] = useState(false);
+  
+  const researchPapers = React.useMemo(() => {
+    const papers = new Set(questions.map(q => q.researchPaperId).filter(Boolean));
+    return Array.from(papers);
+  }, [questions]);
 
+  const form = useForm<z.infer<typeof questionSchema>>({
+    resolver: zodResolver(questionSchema),
+  });
+  
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -55,24 +106,143 @@ export default function QuestionsPage() {
   
   const triggerFileSelect = () => questionsFileInputRef.current?.click();
 
+  async function onSubmit(values: z.infer<typeof questionSchema>) {
+    try {
+      const newQuestion = {
+        id: values.id,
+        text: values.text,
+        researchPaperId: values.researchPaperId,
+        options: [values.option1, values.option2, values.option3, values.option4],
+        correctAnswer: values.correctAnswer,
+      };
+      await store.addQuestion(newQuestion);
+      toast({
+        title: "Success",
+        description: "Question added successfully.",
+      });
+      setAddQuestionDialogOpen(false);
+      form.reset();
+    } catch (error) {
+      console.error("Failed to add question:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add question.",
+        variant: "destructive",
+      });
+    }
+  }
+
   return (
     <div className="space-y-8">
-        <h1 className="font-headline text-3xl font-bold tracking-tight">
-          Manage Questions
-        </h1>
+        <div className="flex justify-between items-center">
+            <h1 className="font-headline text-3xl font-bold tracking-tight">
+              Manage Questions
+            </h1>
+
+            <Dialog open={isAddQuestionDialogOpen} onOpenChange={setAddQuestionDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" /> Add Question
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add New Question</DialogTitle>
+                  <DialogDescription>
+                    Fill in the details for the new question.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Question ID</FormLabel>
+                          <FormControl>
+                            <Input placeholder="101" type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="text"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Question Text</FormLabel>
+                          <FormControl>
+                            <Input placeholder="What is the capital of Nepal?" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="researchPaperId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Research Paper</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a research paper" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {researchPapers.map(paper => (
+                                <SelectItem key={paper} value={paper}>{paper}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="option1" render={({ field }) => ( <FormItem><FormLabel>Option 1</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="option2" render={({ field }) => ( <FormItem><FormLabel>Option 2</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="option3" render={({ field }) => ( <FormItem><FormLabel>Option 3</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="option4" render={({ field }) => ( <FormItem><FormLabel>Option 4</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="correctAnswer"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Correct Answer</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Must match one of the options" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <DialogFooter>
+                      <Button type="submit">Save Question</Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+
+        </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BookMarked className="h-6 w-6"/> Upload Questions
+              <FileUp className="h-6 w-6"/> Upload via CSV
             </CardTitle>
             <CardDescription>
-              Upload a CSV with the quiz questions. The file should have columns: `id`, `text`, `option1`, `option2`, `option3`, `option4`, `correctAnswer`, `researchPaperId`.
+              Or, upload a CSV with the quiz questions. The file should have columns: `id`, `text`, `option1`, `option2`, `option3`, `option4`, `correctAnswer`, `researchPaperId`.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" ref={questionsFileInputRef} />
-            <Button onClick={triggerFileSelect} className="bg-accent text-accent-foreground hover:bg-accent/90">
+            <Button onClick={triggerFileSelect} variant="secondary">
               <FileUp className="mr-2 h-4 w-4" /> Upload Questions CSV
             </Button>
           </CardContent>
