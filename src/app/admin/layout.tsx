@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from 'react';
@@ -7,7 +8,15 @@ import Sidebar from "@/components/admin/sidebar";
 import { Loader2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, UserCircle } from 'lucide-react';
+import { Menu, UserCircle, LogOut } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useAuth();
@@ -50,16 +59,29 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                 <Sidebar />
               </SheetContent>
             </Sheet>
-             <div className="relative ml-auto flex-1 md:grow-0">
-               <div className="flex items-center gap-2">
-                <UserCircle className="h-6 w-6 text-muted-foreground"/>
-                <span className="text-sm text-muted-foreground">{user?.email}</span>
-               </div>
+             <div className="relative ml-auto flex items-center md:grow-0">
+               <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="overflow-hidden rounded-full">
+                       <UserCircle className="h-6 w-6 text-muted-foreground"/>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </header>
       <div className="flex flex-1">
-        <Sidebar />
-        <main className="flex-1 p-4 md:p-8">
+        <aside className="hidden w-64 flex-shrink-0 border-r bg-muted/40 p-4 md:block">
+            <Sidebar />
+        </aside>
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
             {children}
         </main>
       </div>

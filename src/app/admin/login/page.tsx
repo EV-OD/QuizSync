@@ -32,10 +32,10 @@ export default function LoginPage() {
   }
 
   return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-muted/40">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-muted/40 p-4">
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <CardTitle className="font-headline text-2xl">Admin Login</CardTitle>
+            <CardTitle className="font-headline text-3xl">Admin Login</CardTitle>
             <CardDescription>Sign in to access the dashboard.</CardDescription>
           </CardHeader>
           <CardContent>
