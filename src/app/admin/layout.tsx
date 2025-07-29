@@ -46,43 +46,43 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-       <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-           <Sheet>
-              <SheetTrigger asChild>
-                <Button size="icon" variant="outline" className="sm:hidden">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle Menu</span>
+    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col border-r bg-background sm:flex">
+        <Sidebar />
+      </aside>
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-60">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button size="icon" variant="outline" className="sm:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="sm:max-w-xs">
+              <Sidebar />
+            </SheetContent>
+          </Sheet>
+          <div className="relative ml-auto flex-shrink-0">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="overflow-hidden rounded-full">
+                  <UserCircle className="h-6 w-6 text-muted-foreground" />
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="sm:max-w-xs">
-                <Sidebar />
-              </SheetContent>
-            </Sheet>
-             <div className="relative ml-auto flex items-center md:grow-0">
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="overflow-hidden rounded-full">
-                       <UserCircle className="h-6 w-6 text-muted-foreground"/>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={signOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
-      <div className="flex flex-1">
-        <aside className="hidden w-64 flex-shrink-0 border-r bg-muted/40 p-4 md:block">
-            <Sidebar />
-        </aside>
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-            {children}
+        <main className="flex-1 p-4 md:p-6">
+          {children}
         </main>
       </div>
     </div>
