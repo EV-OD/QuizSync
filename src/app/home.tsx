@@ -91,7 +91,7 @@ export default function Home() {
                     Phase 1: Research Discussions
                 </div>
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline">
-                 Join "Scholars in the <span className="bg-primary/20 px-2 text-primary">Making</span>"
+                 Join "<span className="bg-primary/20 px-4 rounded-sm text-primary backdrop-blur-sm">Scholars</span> in the  Making"
                 </h1>
                 <p className="mt-6 max-w-[700px] text-muted-foreground md:text-xl">
                   A year-long <span className="text-primary font-semibold">journey</span> by IEEE Computer Society, Pulchowk Student Branch Chapter – where your ideas transform into a published research paper in a globally recognized IEEE journal.
