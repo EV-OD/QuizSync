@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import WorldMap from "@/components/ui/world-map";
 import { Timeline } from "@/components/ui/timeline";
 import { Badge } from "@/components/ui/badge";
+import { GlowCard } from "@/components/ui/spotlight-card";
+
 
 const timelineData = [
     {
@@ -144,7 +146,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mx-auto grid max-w-5xl items-start gap-8 py-12 sm:grid-cols-2 md:gap-12 lg:grid-cols-3">
-                <div className="grid gap-4 p-6 rounded-xl border bg-card shadow-sm hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-2 transition-all duration-300">
+                <GlowCard glowColor="purple" className="p-6">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
                         <UploadCloud className="h-6 w-6" />
@@ -154,8 +156,8 @@ export default function Home() {
                   <p className="text-muted-foreground">
                     Engage with experts and peers to refine your research ideas.
                   </p>
-                </div>
-                <div className="grid gap-4 p-6 rounded-xl border bg-card shadow-sm hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-2 transition-all duration-300">
+                </GlowCard>
+                <GlowCard glowColor="purple" className="p-6">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
                       <BookUser className="h-6 w-6" />
@@ -165,8 +167,8 @@ export default function Home() {
                   <p className="text-muted-foreground">
                     Learn the fundamentals by composing a comprehensive review paper.
                   </p>
-                </div>
-                <div className="grid gap-4 p-6 rounded-xl border bg-card shadow-sm hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-2 transition-all duration-300">
+                </GlowCard>
+                <GlowCard glowColor="purple" className="p-6">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
                       <Zap className="h-6 w-6" />
@@ -176,8 +178,8 @@ export default function Home() {
                   <p className="text-muted-foreground">
                     Brainstorm and develop innovative research concepts in a competitive environment.
                   </p>
-                </div>
-                 <div className="grid gap-4 p-6 rounded-xl border bg-card shadow-sm hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-2 transition-all duration-300">
+                </GlowCard>
+                 <GlowCard glowColor="purple" className="p-6">
                   <div className="flex items-center gap-4">
                      <div className="bg-primary text-primary-foreground p-3 rounded-full">
                        <CheckCircle className="h-6 w-6" />
@@ -187,8 +189,8 @@ export default function Home() {
                   <p className="text-muted-foreground">
                     Culminate your work into a final, polished research paper ready for publication.
                   </p>
-                </div>
-                <div className="grid gap-4 p-6 rounded-xl border bg-card shadow-sm hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-2 transition-all duration-300">
+                </GlowCard>
+                <GlowCard glowColor="purple" className="p-6">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
                       <Wallet className="h-6 w-6" />
@@ -198,8 +200,8 @@ export default function Home() {
                   <p className="text-muted-foreground">
                     Compete for a prize pool rewarding the most outstanding research.
                   </p>
-                </div>
-                 <div className="grid gap-4 p-6 rounded-xl border bg-card shadow-sm hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-2 transition-all duration-300">
+                </GlowCard>
+                 <GlowCard glowColor="purple" className="p-6">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
                       <Repeat className="h-6 w-6" />
@@ -209,7 +211,7 @@ export default function Home() {
                   <p className="text-muted-foreground">
                     Get 100% of your registration fee returned upon successful completion.
                   </p>
-                </div>
+                </GlowCard>
               </div>
             </div>
           </section>
