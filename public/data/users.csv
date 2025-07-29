@@ -1,0 +1,5 @@
+userId,userName,researchPaperId,questionIds
+user1,Alice,RP001,"1;2;3;4;5"
+user2,Bob,RP002,"6;7;8;9;10"
+user3,Charlie,RP001,"1;3;5;7;9"
+user4,Dana,RP002,"2;4;6;8;10"

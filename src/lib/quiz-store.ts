@@ -1,0 +1,184 @@
+import { db } from './firebase';
+import { collection, doc, getDocs, writeBatch, runTransaction, onSnapshot, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import type { QuizState, Question, User, LastResult } from './types';
+
+let state: QuizState = {
+  status: 'not-started',
+  users: [],
+  questions: [],
+  userAssignments: {},
+  lastResult: null,
+};
+
+const listeners = new Set<() => void>();
+
+const notify = () => {
+  listeners.forEach(listener => listener());
+};
+
+const processQuestionsCsv = (csvContent: string): Question[] => {
+    const lines = csvContent.trim().split('\n');
+    const header = lines[0].split(',').map(h => h.trim());
+    const questions: Question[] = [];
+
+    const idIndex = header.indexOf('id');
+    const textIndex = header.indexOf('text');
+    const correctAnswerIndex = header.indexOf('correctAnswer');
+    const researchPaperIdIndex = header.indexOf('researchPaperId');
+    const optionIndices = header.map((h, i) => h.startsWith('option') ? i : -1).filter(i => i !== -1);
+
+    if (idIndex === -1 || textIndex === -1 || correctAnswerIndex === -1 || researchPaperIdIndex === -1 || optionIndices.length === 0) {
+        console.error("CSV header is missing one of id, text, correctAnswer, researchPaperId or options columns.");
+        return [];
+    }
+
+    for (let i = 1; i < lines.length; i++) {
+        const data = lines[i].split(',').map(d => d.trim());
+        const options = optionIndices.map(index => data[index]).filter(Boolean);
+
+        if (data.length >= header.length) {
+            questions.push({
+                id: parseInt(data[idIndex], 10),
+                text: data[textIndex],
+                options: options,
+                correctAnswer: data[correctAnswerIndex],
+                researchPaperId: data[researchPaperIdIndex]
+            });
+        }
+    }
+    return questions;
+};
+
+const processUsersCsv = (csvContent: string): { users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions'>[], assignments: Record<string, number[]> } => {
+    const lines = csvContent.trim().split('\n');
+    const header = lines[0].split(',').map(h => h.trim());
+    const users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions'>[] = [];
+    const assignments: Record<string, number[]> = {};
+
+    const userIdIndex = header.indexOf('userId');
+    const userNameIndex = header.indexOf('userName');
+    const researchPaperIdIndex = header.indexOf('researchPaperId');
+    const questionIdsIndex = header.indexOf('questionIds');
+    
+    if (userIdIndex === -1 || userNameIndex === -1 || questionIdsIndex === -1 || researchPaperIdIndex === -1) {
+      console.error("User CSV header is missing one of userId, userName, researchPaperId, or questionIds columns.");
+      return { users: [], assignments: {} };
+    }
+
+    for (let i = 1; i < lines.length; i++) {
+        const data = lines[i].split(',');
+         if (data.length >= header.length) {
+            const userId = data[userIdIndex].trim();
+            const userName = data[userNameIndex].trim();
+            const researchPaperId = data[researchPaperIdIndex].trim();
+            const questionIds = data.slice(questionIdsIndex).join(',').split(';').map(id => parseInt(id.trim(), 10));
+
+            users.push({
+                id: userId,
+                name: userName,
+                researchPaperId: researchPaperId,
+            });
+            assignments[userId] = questionIds;
+        }
+    }
+    return { users, assignments };
+};
+
+
+export const store = {
+  getState: () => state,
+  subscribe: (listener: () => void) => {
+    listeners.add(listener);
+    
+    const unsubscribes = [
+      onSnapshot(doc(db, 'quiz', 'status'), (doc) => {
+        state = { ...state, status: doc.data()?.status || 'not-started' };
+        notify();
+      }),
+      onSnapshot(collection(db, 'users'), (snapshot) => {
+        const users = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, quizUrl: `/quiz/${doc.id}` })) as User[];
+        state = { ...state, users };
+        notify();
+      }),
+      onSnapshot(collection(db, 'questions'), (snapshot) => {
+        const questions = snapshot.docs.map(doc => doc.data()) as Question[];
+        state = { ...state, questions };
+        notify();
+      }),
+       onSnapshot(collection(db, 'userAssignments'), (snapshot) => {
+        const userAssignments: Record<string, number[]> = {};
+        snapshot.docs.forEach(doc => {
+            userAssignments[doc.id] = doc.data().questionIds;
+        });
+        state = { ...state, userAssignments };
+        notify();
+      }),
+    ];
+
+    return () => {
+        listeners.delete(listener);
+        unsubscribes.forEach(unsub => unsub());
+    };
+  },
+  loadQuestionsFromCsv: async (csvContent: string) => {
+    const questions = processQuestionsCsv(csvContent);
+    if(questions.length > 0) {
+      const batch = writeBatch(db);
+      questions.forEach(q => {
+        const docRef = doc(db, 'questions', q.id.toString());
+        batch.set(docRef, q);
+      });
+      await batch.commit();
+    }
+  },
+  loadUsersFromCsv: async (csvContent: string) => {
+    const { users, assignments } = processUsersCsv(csvContent);
+     if(users.length > 0) {
+      const batch = writeBatch(db);
+      users.forEach(user => {
+        const docRef = doc(db, 'users', user.id);
+        batch.set(docRef, { name: user.name, researchPaperId: user.researchPaperId, id: user.id });
+      });
+      Object.entries(assignments).forEach(([userId, questionIds]) => {
+          const docRef = doc(db, 'userAssignments', userId);
+          batch.set(docRef, { questionIds });
+      });
+      await batch.commit();
+    }
+  },
+  startQuiz: async () => {
+    await setDoc(doc(db, 'quiz', 'status'), { status: 'active' });
+  },
+  endQuiz: async () => {
+    await setDoc(doc(db, 'quiz', 'status'), { status: 'finished' });
+  },
+  resetQuiz: async () => {
+    await runTransaction(db, async (transaction) => {
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      usersSnapshot.forEach(userDoc => {
+        transaction.update(userDoc.ref, {
+          score: null,
+          completed: false,
+          totalQuestions: null
+        });
+      });
+      transaction.set(doc(db, 'quiz', 'status'), { status: 'not-started' });
+    });
+  },
+  submitScore: async (userId: string, score: number, total: number) => {
+     try {
+      const userDocRef = doc(db, "users", userId);
+      await updateDoc(userDocRef, { 
+        score: score, 
+        totalQuestions: total, 
+        completed: true 
+      });
+    } catch (e) {
+      console.error("Error submitting score: ", e);
+    }
+  },
+  setLastResult: (result: LastResult) => {
+    state = { ...state, lastResult: result };
+    notify();
+  }
+};
