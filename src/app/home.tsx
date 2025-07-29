@@ -145,7 +145,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="mx-auto grid max-w-5xl items-start gap-8 py-12 sm:grid-cols-2 md:gap-12 lg:grid-cols-3">
+              <div className="mx-auto grid max-w-4xl items-start gap-8 justify-center py-12 sm:grid-cols-2 md:gap-12 lg:grid-cols-3">
                 <GlowCard glowColor="purple">
                   <div className="flex items-center gap-4">
                     <div className="bg-primary text-primary-foreground p-3 rounded-full">
