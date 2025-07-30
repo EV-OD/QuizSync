@@ -31,7 +31,7 @@ export default function WorldMap({
 }: MapProps) {
   const map = new DottedMap({ height: 100, grid: "diagonal" });
   const [viewBox, setViewBox] = useState("0 0 800 400");
-  const [isMobile, setIsMobile] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkScreenSize = () => {
