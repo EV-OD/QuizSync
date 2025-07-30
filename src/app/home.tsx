@@ -75,16 +75,7 @@ export default function Home() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative w-full flex items-center min-h-dvh pt-20 text-foreground overflow-hidden">
-           <WorldMap
-            pins={[
-                { lat: 27.7172, lng: 85.3240, label: "Nepal" } 
-            ]}
-            logo={{
-              imageUrl: "/logos/IEEE-CS_LogoTM-orange.png",
-              lat: 25.5,
-              lng: 85.3240,
-            }}
-          />
+
           <div className="absolute inset-0  backdrop-blur-[2px] md:backdrop-blur-[1px]"></div>
            <div className="absolute inset-0 [mask-image:radial-gradient(at_40%_50%,white_0%,transparent_60%)] md:[mask-image:radial-gradient(at_40%_50%,white_0%,transparent_40%)] backdrop-blur-md"></div>
            <div className="container px-4 md:px-6 text-left relative z-10">
