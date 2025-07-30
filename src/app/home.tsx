@@ -75,7 +75,7 @@ export default function Home() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative w-full flex items-center min-h-dvh pt-20 text-foreground overflow-hidden">
-          <div className="hidden md:visible">
+          <div className="hidden md:inline">
           <WorldMap
             pins={[
                 { lat: 27.7172, lng: 85.3240, label: "Nepal" } 
