@@ -22,7 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useQuizState } from "@/hooks/use-quiz-state";
 import { store } from "@/lib/quiz-store";
-import { FileUp, Users, Copy, PlusCircle, Trash2, AlertTriangle } from "lucide-react";
+import { FileUp, Users, Copy, PlusCircle, Trash2, AlertTriangle, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -179,6 +179,45 @@ export default function UsersPage() {
     }
   };
 
+  const handleExportUsers = () => {
+    if (users.length === 0) {
+      toast({
+        title: "No Users",
+        description: "There are no users to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headers = ["User Name", "User ID (Email)", "Quiz URL", "Research Paper ID"];
+    const csvContent = [
+      headers.join(','),
+      ...users.map(user => [
+        `"${user.name}"`,
+        user.id,
+        `"${window.location.origin}${user.quizUrl}"`,
+        user.researchPaperId
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.href) {
+      URL.revokeObjectURL(link.href);
+    }
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute('download', 'quiz_users.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Success",
+      description: "User data has been exported.",
+    });
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -283,28 +322,33 @@ export default function UsersPage() {
                     Personalized, secure quiz links for each registered user.
                 </CardDescription>
             </div>
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="destructive" disabled={users.length === 0}>
-                        <Trash2 className="mr-2 h-4 w-4" /> Clear All
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                    <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle/>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete all
-                        users and their quiz assignments.
-                    </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleClearAllUsers}>
-                        Continue
-                    </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <div className="flex items-center gap-2">
+               <Button variant="outline" onClick={handleExportUsers} disabled={users.length === 0}>
+                  <Download className="mr-2 h-4 w-4" /> Export Users
+                </Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive" disabled={users.length === 0}>
+                            <Trash2 className="mr-2 h-4 w-4" /> Clear All
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle/>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete all
+                            users and their quiz assignments.
+                        </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleClearAllUsers}>
+                            Continue
+                        </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
         </CardHeader>
         <CardContent>
           <Table>
