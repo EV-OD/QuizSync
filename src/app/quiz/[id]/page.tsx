@@ -58,15 +58,15 @@ export default function QuizPage() {
   }, [userQuestions.length, quizDuration, quizScreen]);
 
 
-  const finishQuiz = useCallback(async () => {
-    if (quizScreen === 'finished' || !userId || !currentUser || userQuestions.length === 0) return;
+  const finishQuiz = useCallback(async (finalAnswers: Record<number, number>) => {
+    if (!userId || !currentUser || userQuestions.length === 0) return;
     
     setQuizScreen('submitting');
 
     let score = 0;
     userQuestions.forEach(q => {
       // Check if the stored answer index matches the correct answer index
-      if (answers[q.id] !== undefined && answers[q.id] === q.correctAnswer) {
+      if (finalAnswers[q.id] !== undefined && finalAnswers[q.id] === q.correctAnswer) {
         score++;
       }
     });
@@ -76,12 +76,12 @@ export default function QuizPage() {
         score, 
         total: userQuestions.length,
         questions: userQuestions,
-        answers: answers
+        answers: finalAnswers
     });
     
     router.push(`/quiz/${currentUser.quizId}/results`);
 
-  }, [quizScreen, userId, currentUser, userQuestions, answers, router]);
+  }, [userId, currentUser, userQuestions, router]);
 
   // Main quiz timer
   useEffect(() => {
@@ -98,22 +98,22 @@ export default function QuizPage() {
              const remaining = quizDuration - elapsed;
              setTotalTimeLeft(remaining > 0 ? remaining : 0);
              if (remaining <= 0) {
-                finishQuiz();
+                finishQuiz(answers);
              }
         }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [status, quizScreen, userQuestions.length, quizStartTime, quizDuration, finishQuiz]);
+  }, [status, quizScreen, userQuestions.length, quizStartTime, quizDuration, finishQuiz, answers]);
   
   const handleNextQuestion = useCallback(() => {
      if (currentQuestionIndex < userQuestions.length - 1) {
         setCurrentQuestionIndex(i => i + 1);
     } else {
         // This is the final question, trigger submission.
-        finishQuiz();
+        finishQuiz(answers);
     }
-  }, [currentQuestionIndex, userQuestions.length, finishQuiz])
+  }, [currentQuestionIndex, userQuestions.length, finishQuiz, answers])
   
   // Per-question timer and advancement
   useEffect(() => {
@@ -164,7 +164,7 @@ export default function QuizPage() {
 
     // If this is the last question, immediately trigger the submission process.
     if (Object.keys(newAnswers).length === userQuestions.length) {
-      finishQuiz();
+      finishQuiz(newAnswers);
     }
   };
   
@@ -268,7 +268,7 @@ export default function QuizPage() {
   }
   
   if (status === 'finished' && quizScreen !== 'finished' && quizScreen !== 'submitting') {
-     finishQuiz();
+     finishQuiz(answers);
      return (
         <div className="flex flex-col min-h-screen">
             <Header />
