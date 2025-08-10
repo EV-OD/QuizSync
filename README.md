@@ -5,7 +5,7 @@ This project is a comprehensive, real-time quiz platform designed for the "Schol
 ## ✨ Features
 
 - **Secure Admin Dashboard**: Google OAuth for admin access, restricted to a specific admin email.
-- **Dynamic Question & User Management**: Easily upload quiz questions and user lists via CSV files.
+- **Dynamic Question & User Management**: Easily upload quiz questions and user lists via CSV files, or add them individually through the UI.
 - **Real-time Quiz Control**: Admins can start, stop, and reset the quiz for all participants simultaneously.
 - **Personalized Quizzes**: Each user is assigned a unique set of questions based on their registered research paper.
 - **Live Leaderboards**: Both a private admin leaderboard and a stunning public-facing leaderboard showcasing the top 5 performers, with real-time updates.
@@ -64,6 +64,17 @@ Open [http://localhost:9003](http://localhost:9003) with your browser to see the
 
 The admin dashboard is available at `/admin`.
 
+## 📁 Sample Data Files
+
+You can find sample CSV files in the `/public` directory to use as a template for populating your quiz.
+
+-   `/public/questions.csv`: Contains sample quiz questions.
+    -   **Columns**: `id`, `text`, `option1`, `option2`, `option3`, `option4`, `correctAnswer`, `researchPaperId`
+    -   The `correctAnswer` value must exactly match the text of one of the `option` columns.
+-   `/public/users.csv`: Contains sample user data.
+    -   **Columns**: `userId`, `userName`, `researchPaperId`
+    -   `userId` should be the participant's email address.
+
 ## 📁 Project Structure
 
 ```
@@ -84,7 +95,7 @@ The admin dashboard is available at `/admin`.
 │   │   ├── quiz-store.ts   # Global state management for the quiz
 │   │   ├── types.ts        # TypeScript type definitions
 │   │   └── utils.ts        # Utility functions
-│   └── public              # Static assets (images, logos)
+│   └── public              # Static assets (images, logos, sample CSVs)
 ├── .env                    # Environment variables (needs to be created)
 └── tailwind.config.ts      # Tailwind CSS configuration
 ```
