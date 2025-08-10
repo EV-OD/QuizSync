@@ -59,12 +59,9 @@ export default function QuizPage() {
 
 
   const finishQuiz = useCallback(async () => {
-    if (quizScreen === 'finished' || quizScreen === 'submitting' || !userId || !currentUser || userQuestions.length === 0) return;
+    if (quizScreen === 'finished' || !userId || !currentUser || userQuestions.length === 0) return;
     
-    // Ensure we are in submitting state, even if called from a timer.
-    if(quizScreen !== 'submitting') {
-      setQuizScreen('submitting');
-    }
+    setQuizScreen('submitting');
 
     let score = 0;
     userQuestions.forEach(q => {
@@ -165,9 +162,9 @@ export default function QuizPage() {
     const newAnswers = { ...answers, [questionId]: answerIndex };
     setAnswers(newAnswers);
 
-    // If this is the last question, immediately trigger the submitting state.
+    // If this is the last question, immediately trigger the submission process.
     if (Object.keys(newAnswers).length === userQuestions.length) {
-      setQuizScreen('submitting');
+      finishQuiz();
     }
   };
   
@@ -422,5 +419,3 @@ export default function QuizPage() {
     </AntiCheatWrapper>
   );
 }
-
-    
