@@ -43,7 +43,7 @@ export default function QuizPage() {
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [answers, setAnswers] = useState<Record<number, number>>({}); // questionId -> selected option index
   const [quizScreen, setQuizScreen] = useState<'welcome' | 'playing' | 'submitting' | 'finished'>('welcome');
   const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
   
@@ -64,7 +64,8 @@ export default function QuizPage() {
 
     let score = 0;
     userQuestions.forEach(q => {
-      if (answers[q.id] && answers[q.id] === q.correctAnswer) {
+      // Check if the stored answer index matches the correct answer index
+      if (answers[q.id] !== undefined && answers[q.id] === q.correctAnswer) {
         score++;
       }
     });
@@ -152,9 +153,9 @@ export default function QuizPage() {
   }, [currentQuestionIndex]);
 
 
-  const handleAnswerSelect = (questionId: number, answer: string) => {
-    if (quizScreen !== 'playing' || answers[questionId]) return;
-    setAnswers(prev => ({ ...prev, [questionId]: answer }));
+  const handleAnswerSelect = (questionId: number, answerIndex: number) => {
+    if (quizScreen !== 'playing' || answers[questionId] !== undefined) return;
+    setAnswers(prev => ({ ...prev, [questionId]: answerIndex }));
   };
   
   const currentQuestion = userQuestions[currentQuestionIndex];
@@ -382,9 +383,9 @@ export default function QuizPage() {
                       </CardHeader>
                       <CardContent className="pt-6">
                         <RadioGroup 
-                            onValueChange={(val) => handleAnswerSelect(currentQuestion.id, val)} 
+                            onValueChange={(val) => handleAnswerSelect(currentQuestion.id, parseInt(val))} 
                             className="space-y-3"
-                            value={answers[currentQuestion.id] || ""}
+                            value={answers[currentQuestion.id]?.toString() || ""}
                             key={currentQuestion.id}
                         >
                           {currentQuestion.options.map((option, index) => (
@@ -393,7 +394,7 @@ export default function QuizPage() {
                                 key={index}
                                 className="flex items-center space-x-4 p-3 md:p-4 rounded-lg border bg-background hover:bg-accent/50 has-[input:checked]:bg-accent has-[input:checked]:border-accent-foreground cursor-pointer transition-colors"
                             >
-                                <RadioGroupItem value={option} id={`option-${index}`} className="h-5 w-5"/>
+                                <RadioGroupItem value={index.toString()} id={`option-${index}`} className="h-5 w-5"/>
                                 <span className="text-sm md:text-base font-medium">{option}</span>
                             </Label>
                           ))}

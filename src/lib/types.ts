@@ -1,8 +1,9 @@
+
 export interface Question {
   id: number;
   text: string;
   options: string[];
-  correctAnswer: string;
+  correctAnswer: number; // Index of the correct answer in the options array
   researchPaperId: string;
 }
 
@@ -21,7 +22,7 @@ export interface LastResult {
   score: number;
   total: number;
   questions: Question[];
-  answers: Record<number, string>;
+  answers: Record<number, number>; // questionId -> selected option index
 }
 
 export interface QuizState {

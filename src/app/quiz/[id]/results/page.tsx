@@ -100,18 +100,22 @@ export default function ResultsPage() {
                   <ScrollArea className="h-[60vh] pr-4">
                      <div className="space-y-6">
                         {questions.map((q, index) => {
-                            const userAnswer = answers[q.id] || "Not Answered";
-                            const isCorrect = userAnswer === q.correctAnswer;
+                            const userAnswerIndex = answers[q.id];
+                            const isAnswered = userAnswerIndex !== undefined;
+                            const userAnswerText = isAnswered ? q.options[userAnswerIndex] : "Not Answered";
+                            const correctAnswerText = q.options[q.correctAnswer];
+                            const isCorrect = isAnswered && userAnswerIndex === q.correctAnswer;
+                            
                             return (
                                <div key={q.id} className="p-4 border rounded-lg">
                                  <p className="font-semibold mb-2">{index + 1}. {q.text}</p>
                                  <div className="space-y-2">
-                                    <p className="text-sm">Correct Answer: <span className="font-medium text-green-600">{q.correctAnswer}</span></p>
+                                    <p className="text-sm">Correct Answer: <span className="font-medium text-green-600">{correctAnswerText}</span></p>
                                     <div className="flex items-center text-sm">
                                       Your Answer: 
                                       <span className={`ml-2 font-medium flex items-center gap-2 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
                                         {isCorrect ? <Check className="h-4 w-4"/> : <X className="h-4 w-4"/>}
-                                        {userAnswer}
+                                        {userAnswerText}
                                       </span>
                                     </div>
                                  </div>

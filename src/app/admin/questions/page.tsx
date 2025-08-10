@@ -73,7 +73,7 @@ const questionSchema = z.object({
   option2: z.string().min(1, "Option 2 is required"),
   option3: z.string().min(1, "Option 3 is required"),
   option4: z.string().min(1, "Option 4 is required"),
-  correctAnswer: z.string().min(1, "Correct answer is required"),
+  correctAnswer: z.string().min(1, "A correct answer must be selected"),
 });
 
 export default function QuestionsPage() {
@@ -89,6 +89,12 @@ export default function QuestionsPage() {
 
   const form = useForm<z.infer<typeof questionSchema>>({
     resolver: zodResolver(questionSchema),
+    defaultValues: {
+      option1: "",
+      option2: "",
+      option3: "",
+      option4: "",
+    }
   });
   
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,12 +126,13 @@ export default function QuestionsPage() {
 
   async function onSubmit(values: z.infer<typeof questionSchema>) {
     try {
+      const options = [values.option1, values.option2, values.option3, values.option4];
       const newQuestion: Question = {
         id: values.id,
         text: values.text,
         researchPaperId: values.researchPaperId,
-        options: [values.option1, values.option2, values.option3, values.option4],
-        correctAnswer: values.correctAnswer,
+        options: options,
+        correctAnswer: parseInt(values.correctAnswer, 10),
       };
       await store.addQuestion(newQuestion);
       toast({
@@ -258,9 +265,19 @@ export default function QuestionsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Correct Answer</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Must match one of the options" {...field} />
-                          </FormControl>
+                           <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select the correct option" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="0">Option 1</SelectItem>
+                              <SelectItem value="1">Option 2</SelectItem>
+                              <SelectItem value="2">Option 3</SelectItem>
+                              <SelectItem value="3">Option 4</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -281,7 +298,7 @@ export default function QuestionsPage() {
               <FileUp className="h-6 w-6"/> Upload via CSV
             </CardTitle>
             <CardDescription>
-              Or, upload a CSV with the quiz questions. The file should have columns: `id`, `text`, `option1`, `option2`, `option3`, `option4`, `correctAnswer`, `researchPaperId`.
+              Or, upload a CSV with the quiz questions. The file should have columns: `id`, `text`, `option1`, `option2`, `option3`, `option4`, `correctAnswer`, `researchPaperId`. The `correctAnswer` must exactly match one of the option texts.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -341,7 +358,7 @@ export default function QuestionsPage() {
                       <TableCell>{q.id}</TableCell>
                       <TableCell>{q.researchPaperId}</TableCell>
                       <TableCell>{q.text}</TableCell>
-                      <TableCell>{q.correctAnswer}</TableCell>
+                      <TableCell>{q.options[q.correctAnswer]}</TableCell>
                        <TableCell className="text-right">
                           <AlertDialog>
                             <AlertDialogTrigger asChild>

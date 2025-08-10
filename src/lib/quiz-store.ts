@@ -31,25 +31,32 @@ const processQuestionsCsv = (csvContent: string): Question[] => {
 
     const idIndex = header.indexOf('id');
     const textIndex = header.indexOf('text');
-    const correctAnswerIndex = header.indexOf('correctAnswer');
+    const correctAnswerTextIndex = header.indexOf('correctAnswer');
     const researchPaperIdIndex = header.indexOf('researchPaperId');
     const optionIndices = header.map((h, i) => h.startsWith('option') ? i : -1).filter(i => i !== -1);
 
-    if (idIndex === -1 || textIndex === -1 || correctAnswerIndex === -1 || researchPaperIdIndex === -1 || optionIndices.length === 0) {
+    if (idIndex === -1 || textIndex === -1 || correctAnswerTextIndex === -1 || researchPaperIdIndex === -1 || optionIndices.length === 0) {
         console.error("CSV header is missing one of id, text, correctAnswer, researchPaperId or options columns.");
         return [];
     }
 
     for (let i = 1; i < lines.length; i++) {
         const data = lines[i].split(',').map(d => d.trim());
-        const options = optionIndices.map(index => data[index]).filter(Boolean);
-
         if (data.length >= header.length) {
+            const options = optionIndices.map(index => data[index]).filter(Boolean);
+            const correctAnswerText = data[correctAnswerTextIndex];
+            const correctAnswerIndex = options.indexOf(correctAnswerText);
+
+            if (correctAnswerIndex === -1) {
+                console.error(`Correct answer "${correctAnswerText}" not found in options for question ID ${data[idIndex]}`);
+                continue;
+            }
+
             questions.push({
                 id: parseInt(data[idIndex], 10),
                 text: data[textIndex],
                 options: options,
-                correctAnswer: data[correctAnswerIndex],
+                correctAnswer: correctAnswerIndex,
                 researchPaperId: data[researchPaperIdIndex]
             });
         }
