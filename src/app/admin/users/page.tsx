@@ -50,7 +50,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -70,7 +69,6 @@ const userSchema = z.object({
   id: z.string().email("Please enter a valid email address."),
   name: z.string().min(1, "User name is required"),
   researchPaperId: z.string().min(1, "Research Paper ID is required"),
-  questionIds: z.string().min(1, "Question IDs are required").regex(/^[0-9]+(;[0-9]+)*$/, "Must be semicolon-separated numbers (e.g., 1;2;3)"),
 });
 
 export default function UsersPage() {
@@ -130,9 +128,8 @@ export default function UsersPage() {
         name: values.name,
         researchPaperId: values.researchPaperId,
       };
-      const questionIds = values.questionIds.split(';').map(id => parseInt(id.trim(), 10));
       
-      await store.addUser(newUser, questionIds);
+      await store.addUser(newUser);
       
       toast({
         title: "Success",
@@ -251,22 +248,6 @@ export default function UsersPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="questionIds"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Question IDs</FormLabel>
-                      <FormControl>
-                        <Input placeholder="1;2;3;4;5" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Semicolon-separated list of question IDs.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <DialogFooter>
                   <Button type="submit">Save User</Button>
                 </DialogFooter>
@@ -282,7 +263,7 @@ export default function UsersPage() {
             <FileUp className="h-6 w-6"/> Upload via CSV
           </CardTitle>
           <CardDescription>
-            Or, upload a CSV with user assignments. The file should have columns: `userId`, `userName`, `researchPaperId`, `questionIds` (semicolon-separated). A unique URL will be generated for each user.
+            Or, upload a CSV with user assignments. The file should have columns: `userId`, `userName`, and `researchPaperId`. A unique URL will be generated for each user.
           </CardDescription>
         </CardHeader>
         <CardContent>

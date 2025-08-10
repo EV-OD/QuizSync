@@ -1,6 +1,6 @@
 
 import { db } from './firebase';
-import { collection, doc, getDocs, writeBatch, runTransaction, onSnapshot, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, writeBatch, runTransaction, onSnapshot, setDoc, deleteDoc, updateDoc, query, where, getDoc } from 'firebase/firestore';
 import type { QuizState, Question, User, LastResult } from './types';
 
 let state: QuizState = {
@@ -57,20 +57,18 @@ const processQuestionsCsv = (csvContent: string): Question[] => {
     return questions;
 };
 
-const processUsersCsv = (csvContent: string): { users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>[], assignments: Record<string, number[]> } => {
+const processUsersCsv = (csvContent: string): { users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>[] } => {
     const lines = csvContent.trim().split('\n');
     const header = lines[0].split(',').map(h => h.trim());
     const users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>[] = [];
-    const assignments: Record<string, number[]> = {};
 
     const userIdIndex = header.indexOf('userId');
     const userNameIndex = header.indexOf('userName');
     const researchPaperIdIndex = header.indexOf('researchPaperId');
-    const questionIdsIndex = header.indexOf('questionIds');
     
-    if (userIdIndex === -1 || userNameIndex === -1 || questionIdsIndex === -1 || researchPaperIdIndex === -1) {
-      console.error("User CSV header is missing one of userId, userName, researchPaperId, or questionIds columns.");
-      return { users: [], assignments: {} };
+    if (userIdIndex === -1 || userNameIndex === -1 || researchPaperIdIndex === -1) {
+      console.error("User CSV header is missing one of userId, userName, or researchPaperId columns.");
+      return { users: [] };
     }
 
     for (let i = 1; i < lines.length; i++) {
@@ -79,17 +77,15 @@ const processUsersCsv = (csvContent: string): { users: Omit<User, 'quizUrl' | 's
             const userId = data[userIdIndex].trim();
             const userName = data[userNameIndex].trim();
             const researchPaperId = data[researchPaperIdIndex].trim();
-            const questionIds = data.slice(questionIdsIndex).join(',').split(';').map(id => parseInt(id.trim(), 10));
 
             users.push({
                 id: userId,
                 name: userName,
                 researchPaperId: researchPaperId,
             });
-            assignments[userId] = questionIds;
         }
     }
-    return { users, assignments };
+    return { users };
 };
 
 
@@ -139,18 +135,25 @@ export const store = {
     const docRef = doc(db, 'questions', question.id.toString());
     await setDoc(docRef, question);
   },
-  addUser: async (user: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>, questionIds: number[]) => {
+  addUser: async (user: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>) => {
     const batch = writeBatch(db);
     const userDocRef = doc(db, 'users', user.id);
     const quizId = generateQuizId();
+
+    const questionsQuery = query(collection(db, 'questions'), where('researchPaperId', '==', user.researchPaperId));
+    const questionsSnapshot = await getDocs(questionsQuery);
+    const questionIds = questionsSnapshot.docs.map(doc => doc.data().id);
+
     batch.set(userDocRef, { 
         name: user.name, 
         researchPaperId: user.researchPaperId, 
         id: user.id,
         quizId: quizId,
     });
+
     const assignmentDocRef = doc(db, 'userAssignments', user.id);
     batch.set(assignmentDocRef, { questionIds });
+
     await batch.commit();
   },
   loadQuestionsFromCsv: async (csvContent: string) => {
@@ -165,23 +168,33 @@ export const store = {
     }
   },
   loadUsersFromCsv: async (csvContent: string) => {
-    const { users, assignments } = processUsersCsv(csvContent);
+    const { users } = processUsersCsv(csvContent);
      if(users.length > 0) {
       const batch = writeBatch(db);
+
+      // We need to fetch all questions to do the mapping locally.
+      // This is less efficient than querying per user, but simpler for a batch operation.
+      const allQuestionsSnapshot = await getDocs(collection(db, 'questions'));
+      const allQuestions = allQuestionsSnapshot.docs.map(d => d.data() as Question);
+
       users.forEach(user => {
-        const docRef = doc(db, 'users', user.id);
+        const userDocRef = doc(db, 'users', user.id);
         const quizId = generateQuizId();
-        batch.set(docRef, { 
+        batch.set(userDocRef, { 
             name: user.name, 
             researchPaperId: user.researchPaperId, 
             id: user.id,
             quizId: quizId,
         });
+
+        const questionIds = allQuestions
+            .filter(q => q.researchPaperId === user.researchPaperId)
+            .map(q => q.id);
+        
+        const assignmentDocRef = doc(db, 'userAssignments', user.id);
+        batch.set(assignmentDocRef, { questionIds });
       });
-      Object.entries(assignments).forEach(([userId, questionIds]) => {
-          const docRef = doc(db, 'userAssignments', userId);
-          batch.set(docRef, { questionIds });
-      });
+
       await batch.commit();
     }
   },
