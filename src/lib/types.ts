@@ -7,7 +7,8 @@ export interface Question {
 }
 
 export interface User {
-  id: string;
+  id: string; // This is the user's email
+  quizId: string; // This is the unique, random ID for the quiz URL
   name: string;
   quizUrl: string;
   researchPaperId: string;

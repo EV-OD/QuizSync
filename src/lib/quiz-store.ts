@@ -17,6 +17,10 @@ const notify = () => {
   listeners.forEach(listener => listener());
 };
 
+const generateQuizId = () => {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
 const processQuestionsCsv = (csvContent: string): Question[] => {
     const lines = csvContent.trim().split('\n');
     const header = lines[0].split(',').map(h => h.trim());
@@ -50,10 +54,10 @@ const processQuestionsCsv = (csvContent: string): Question[] => {
     return questions;
 };
 
-const processUsersCsv = (csvContent: string): { users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions'>[], assignments: Record<string, number[]> } => {
+const processUsersCsv = (csvContent: string): { users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>[], assignments: Record<string, number[]> } => {
     const lines = csvContent.trim().split('\n');
     const header = lines[0].split(',').map(h => h.trim());
-    const users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions'>[] = [];
+    const users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>[] = [];
     const assignments: Record<string, number[]> = {};
 
     const userIdIndex = header.indexOf('userId');
@@ -97,7 +101,14 @@ export const store = {
         notify();
       }),
       onSnapshot(collection(db, 'users'), (snapshot) => {
-        const users = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, quizUrl: `/quiz/${doc.id}` })) as User[];
+        const users = snapshot.docs.map(doc => {
+            const data = doc.data() as Omit<User, 'id' | 'quizUrl'>;
+            return {
+                ...data,
+                id: doc.id,
+                quizUrl: `/quiz/${data.quizId}`
+            }
+        }) as User[];
         state = { ...state, users };
         notify();
       }),
@@ -125,10 +136,16 @@ export const store = {
     const docRef = doc(db, 'questions', question.id.toString());
     await setDoc(docRef, question);
   },
-  addUser: async (user: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions'>, questionIds: number[]) => {
+  addUser: async (user: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>, questionIds: number[]) => {
     const batch = writeBatch(db);
     const userDocRef = doc(db, 'users', user.id);
-    batch.set(userDocRef, { name: user.name, researchPaperId: user.researchPaperId, id: user.id });
+    const quizId = generateQuizId();
+    batch.set(userDocRef, { 
+        name: user.name, 
+        researchPaperId: user.researchPaperId, 
+        id: user.id,
+        quizId: quizId,
+    });
     const assignmentDocRef = doc(db, 'userAssignments', user.id);
     batch.set(assignmentDocRef, { questionIds });
     await batch.commit();
@@ -150,7 +167,13 @@ export const store = {
       const batch = writeBatch(db);
       users.forEach(user => {
         const docRef = doc(db, 'users', user.id);
-        batch.set(docRef, { name: user.name, researchPaperId: user.researchPaperId, id: user.id });
+        const quizId = generateQuizId();
+        batch.set(docRef, { 
+            name: user.name, 
+            researchPaperId: user.researchPaperId, 
+            id: user.id,
+            quizId: quizId,
+        });
       });
       Object.entries(assignments).forEach(([userId, questionIds]) => {
           const docRef = doc(db, 'userAssignments', userId);

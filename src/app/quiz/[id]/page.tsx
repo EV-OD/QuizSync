@@ -21,11 +21,12 @@ const TIME_PER_QUESTION = 15; // 15 seconds per question
 export default function QuizPage() {
   const router = useRouter();
   const params = useParams();
-  const userId = params.id as string;
+  const quizId = params.id as string;
   const { status, questions, userAssignments, users } = useQuizState();
   const [isUserValid, setIsUserValid] = useState<boolean | null>(null);
 
-  const currentUser = useMemo(() => users.find(u => u.id === userId), [users, userId]);
+  const currentUser = useMemo(() => users.find(u => u.quizId === quizId), [users, quizId]);
+  const userId = currentUser?.id;
 
   useEffect(() => {
     if (users.length > 0) {
@@ -58,7 +59,7 @@ export default function QuizPage() {
 
 
   const finishQuiz = useCallback(async () => {
-    if (quizScreen === 'finished' || quizScreen === 'submitting' || !userId || userQuestions.length === 0) return;
+    if (quizScreen === 'finished' || quizScreen === 'submitting' || !userId || !currentUser || userQuestions.length === 0) return;
     setQuizScreen('submitting');
 
     let score = 0;
@@ -76,9 +77,9 @@ export default function QuizPage() {
         answers: answers
     });
     
-    router.push(`/quiz/${userId}/results`);
+    router.push(`/quiz/${currentUser.quizId}/results`);
 
-  }, [quizScreen, userId, userQuestions, answers, router]);
+  }, [quizScreen, userId, currentUser, userQuestions, answers, router]);
 
   // Main quiz timer
   useEffect(() => {
@@ -185,10 +186,10 @@ export default function QuizPage() {
           <Card className="w-full max-w-md">
             <CardHeader className="items-center">
                <XCircle className="h-12 w-12 text-destructive" />
-              <CardTitle className="font-headline text-2xl">Invalid User</CardTitle>
+              <CardTitle className="font-headline text-2xl">Invalid Quiz Link</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p>This user ID is not registered for a quiz, or the link is invalid. Please check the URL and try again.</p>
+              <p>This quiz link is invalid or has expired. Please check the URL and try again.</p>
               <Button onClick={() => router.push('/')}>Go to Homepage</Button>
             </CardContent>
           </Card>
@@ -407,4 +408,3 @@ export default function QuizPage() {
     </AntiCheatWrapper>
   );
 }
-

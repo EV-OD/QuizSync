@@ -114,7 +114,7 @@ export default function UsersPage() {
 
   async function onSubmit(values: z.infer<typeof userSchema>) {
     try {
-      const newUser: Omit<UserType, 'quizUrl' | 'score' | 'completed' | 'totalQuestions'> = {
+      const newUser: Omit<UserType, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'> = {
         id: values.id,
         name: values.name,
         researchPaperId: values.researchPaperId,
@@ -155,7 +155,7 @@ export default function UsersPage() {
             <DialogHeader>
               <DialogTitle>Add New User</DialogTitle>
               <DialogDescription>
-                Fill in the details for the new user and assign them questions.
+                A unique quiz URL will be generated automatically.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -239,7 +239,7 @@ export default function UsersPage() {
             <FileUp className="h-6 w-6"/> Upload via CSV
           </CardTitle>
           <CardDescription>
-            Or, upload a CSV with user assignments. The file should have columns: `userId`, `userName`, `researchPaperId`, `questionIds` (semicolon-separated).
+            Or, upload a CSV with user assignments. The file should have columns: `userId`, `userName`, `researchPaperId`, `questionIds` (semicolon-separated). A unique URL will be generated for each user.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -255,7 +255,7 @@ export default function UsersPage() {
         <CardHeader>
           <CardTitle>Users & Links</CardTitle>
           <CardDescription>
-            Personalized quiz links for each registered user.
+            Personalized, secure quiz links for each registered user.
           </CardDescription>
         </CardHeader>
         <CardContent>
