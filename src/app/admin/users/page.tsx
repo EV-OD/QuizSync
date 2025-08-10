@@ -22,7 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useQuizState } from "@/hooks/use-quiz-state";
 import { store } from "@/lib/quiz-store";
-import { FileUp, Users, Copy, PlusCircle } from "lucide-react";
+import { FileUp, Users, Copy, PlusCircle, Trash2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,6 +36,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Form,
   FormControl,
@@ -138,6 +149,38 @@ export default function UsersPage() {
       });
     }
   }
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await store.deleteUser(userId);
+      toast({
+        title: "Success",
+        description: "User deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete user.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleClearAllUsers = async () => {
+    try {
+      await store.clearAllUsers();
+      toast({
+        title: "Success",
+        description: "All users have been deleted.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to clear users.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -252,11 +295,35 @@ export default function UsersPage() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Users & Links</CardTitle>
-          <CardDescription>
-            Personalized, secure quiz links for each registered user.
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+                <CardTitle>Users & Links</CardTitle>
+                <CardDescription>
+                    Personalized, secure quiz links for each registered user.
+                </CardDescription>
+            </div>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" disabled={users.length === 0}>
+                        <Trash2 className="mr-2 h-4 w-4" /> Clear All
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle/>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete all
+                        users and their quiz assignments.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleClearAllUsers}>
+                        Continue
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </CardHeader>
         <CardContent>
           <Table>
@@ -283,7 +350,7 @@ export default function UsersPage() {
                       )}
                     </TableCell>
                      <TableCell>{user.score != null ? `${user.score} / ${user.totalQuestions}` : 'N/A'}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-2">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -291,6 +358,27 @@ export default function UsersPage() {
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
+                       <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete User?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete the user and their quiz assignment.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))

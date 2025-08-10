@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { useQuizState } from "@/hooks/use-quiz-state";
 import { store } from "@/lib/quiz-store";
-import { FileUp, BookMarked, PlusCircle } from "lucide-react";
+import { FileUp, BookMarked, PlusCircle, Trash2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,6 +35,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Form,
   FormControl,
@@ -52,6 +63,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Question } from "@/lib/types";
 
 const questionSchema = z.object({
   id: z.coerce.number().min(1, "ID is required"),
@@ -108,7 +120,7 @@ export default function QuestionsPage() {
 
   async function onSubmit(values: z.infer<typeof questionSchema>) {
     try {
-      const newQuestion = {
+      const newQuestion: Question = {
         id: values.id,
         text: values.text,
         researchPaperId: values.researchPaperId,
@@ -131,6 +143,38 @@ export default function QuestionsPage() {
       });
     }
   }
+
+  const handleDeleteQuestion = async (questionId: number) => {
+    try {
+      await store.deleteQuestion(questionId);
+      toast({
+        title: "Success",
+        description: "Question deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete question.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleClearAllQuestions = async () => {
+    try {
+      await store.clearAllQuestions();
+      toast({
+        title: "Success",
+        description: "All questions have been deleted.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to clear questions.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -249,11 +293,35 @@ export default function QuestionsPage() {
         </Card>
         
         <Card>
-          <CardHeader>
-            <CardTitle>Uploaded Questions</CardTitle>
-            <CardDescription>
-              A list of all questions currently in the database.
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+                <CardTitle>Uploaded Questions</CardTitle>
+                <CardDescription>
+                A list of all questions currently in the database.
+                </CardDescription>
+            </div>
+             <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" disabled={questions.length === 0}>
+                        <Trash2 className="mr-2 h-4 w-4" /> Clear All
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle/>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete all
+                        questions from the database.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleClearAllQuestions}>
+                        Continue
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
           </CardHeader>
           <CardContent>
             <Table>
@@ -263,6 +331,7 @@ export default function QuestionsPage() {
                   <TableHead>Research Paper</TableHead>
                   <TableHead>Question Text</TableHead>
                   <TableHead>Correct Answer</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -273,11 +342,34 @@ export default function QuestionsPage() {
                       <TableCell>{q.researchPaperId}</TableCell>
                       <TableCell>{q.text}</TableCell>
                       <TableCell>{q.correctAnswer}</TableCell>
+                       <TableCell className="text-right">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Question?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete this question.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteQuestion(q.id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center h-24">
+                    <TableCell colSpan={5} className="text-center h-24">
                       No questions found. Upload a questions CSV to get started.
                     </TableCell>
                   </TableRow>

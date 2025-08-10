@@ -18,7 +18,10 @@ const notify = () => {
 };
 
 const generateQuizId = () => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    // Generate two random strings and concatenate them to ensure a good length and uniqueness
+    const part1 = Math.random().toString(36).substring(2, 9);
+    const part2 = Date.now().toString(36).substring(4);
+    return `${part1}${part2}`;
 }
 
 const processQuestionsCsv = (csvContent: string): Question[] => {
@@ -102,7 +105,7 @@ export const store = {
       }),
       onSnapshot(collection(db, 'users'), (snapshot) => {
         const users = snapshot.docs.map(doc => {
-            const data = doc.data() as Omit<User, 'id' | 'quizUrl'>;
+            const data = doc.data() as Omit<User, 'id'>;
             return {
                 ...data,
                 id: doc.id,
@@ -216,5 +219,28 @@ export const store = {
   setLastResult: (result: LastResult) => {
     state = { ...state, lastResult: result };
     notify();
+  },
+  deleteQuestion: async (questionId: number) => {
+    await deleteDoc(doc(db, 'questions', questionId.toString()));
+  },
+  clearAllQuestions: async () => {
+    const questionsSnapshot = await getDocs(collection(db, 'questions'));
+    const batch = writeBatch(db);
+    questionsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+  },
+  deleteUser: async (userId: string) => {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'users', userId));
+    batch.delete(doc(db, 'userAssignments', userId));
+    await batch.commit();
+  },
+  clearAllUsers: async () => {
+    const batch = writeBatch(db);
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    usersSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+    const assignmentsSnapshot = await getDocs(collection(db, 'userAssignments'));
+    assignmentsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
   }
 };
