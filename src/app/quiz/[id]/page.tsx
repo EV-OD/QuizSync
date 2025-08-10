@@ -60,7 +60,11 @@ export default function QuizPage() {
 
   const finishQuiz = useCallback(async () => {
     if (quizScreen === 'finished' || quizScreen === 'submitting' || !userId || !currentUser || userQuestions.length === 0) return;
-    setQuizScreen('submitting');
+    
+    // Ensure we are in submitting state, even if called from a timer.
+    if(quizScreen !== 'submitting') {
+      setQuizScreen('submitting');
+    }
 
     let score = 0;
     userQuestions.forEach(q => {
@@ -108,8 +112,11 @@ export default function QuizPage() {
   const handleNextQuestion = useCallback(() => {
      if (currentQuestionIndex < userQuestions.length - 1) {
         setCurrentQuestionIndex(i => i + 1);
+    } else {
+        // This is the final question, trigger submission.
+        finishQuiz();
     }
-  }, [currentQuestionIndex, userQuestions.length])
+  }, [currentQuestionIndex, userQuestions.length, finishQuiz])
   
   // Per-question timer and advancement
   useEffect(() => {
@@ -129,22 +136,21 @@ export default function QuizPage() {
   }, [status, quizScreen, handleNextQuestion]);
   
   
-  // Effect to automatically advance to next question or finish quiz
+  // Effect to automatically advance to next question after answering
   useEffect(() => {
       if (quizScreen !== 'playing' || userQuestions.length === 0) return;
       
       const answeredQuestions = Object.keys(answers).length;
-      if (answeredQuestions === 0) return;
+      if (answeredQuestions === 0 || answeredQuestions <= currentQuestionIndex) return;
 
-      if (answeredQuestions === userQuestions.length) {
-          finishQuiz();
-      } else if (answeredQuestions > currentQuestionIndex) {
-           const timeoutId = setTimeout(() => {
-                handleNextQuestion();
-           }, 300);
-           return () => clearTimeout(timeoutId);
+      // If the current question has been answered, move to the next one after a delay.
+      if (answers[userQuestions[currentQuestionIndex].id] !== undefined) {
+         const timeoutId = setTimeout(() => {
+              handleNextQuestion();
+         }, 300);
+         return () => clearTimeout(timeoutId);
       }
-  }, [answers, currentQuestionIndex, userQuestions.length, quizScreen, finishQuiz, handleNextQuestion]);
+  }, [answers, currentQuestionIndex, userQuestions, quizScreen, handleNextQuestion]);
 
 
   // Reset question timer on new question
@@ -155,7 +161,14 @@ export default function QuizPage() {
 
   const handleAnswerSelect = (questionId: number, answerIndex: number) => {
     if (quizScreen !== 'playing' || answers[questionId] !== undefined) return;
-    setAnswers(prev => ({ ...prev, [questionId]: answerIndex }));
+    
+    const newAnswers = { ...answers, [questionId]: answerIndex };
+    setAnswers(newAnswers);
+
+    // If this is the last question, immediately trigger the submitting state.
+    if (Object.keys(newAnswers).length === userQuestions.length) {
+      setQuizScreen('submitting');
+    }
   };
   
   const currentQuestion = userQuestions[currentQuestionIndex];
@@ -409,3 +422,5 @@ export default function QuizPage() {
     </AntiCheatWrapper>
   );
 }
+
+    
