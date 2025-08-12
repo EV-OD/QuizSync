@@ -22,7 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useQuizState } from "@/hooks/use-quiz-state";
 import { store } from "@/lib/quiz-store";
-import { FileUp, Users, Copy, PlusCircle, Trash2, AlertTriangle, Download } from "lucide-react";
+import { FileUp, Users, Copy, PlusCircle, Trash2, AlertTriangle, Download, TestTube2, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,6 +63,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { User as UserType } from "@/lib/types";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 const userSchema = z.object({
@@ -71,11 +72,19 @@ const userSchema = z.object({
   researchPaperId: z.string().min(1, "Research Paper ID is required"),
 });
 
+interface TestResult {
+    userName: string;
+    researchPaperId: string;
+    hasQuestions: boolean;
+}
+
 export default function UsersPage() {
   const { users, questions } = useQuizState();
   const { toast } = useToast();
   const usersFileInputRef = React.useRef<HTMLInputElement>(null);
   const [isAddUserDialogOpen, setAddUserDialogOpen] = useState(false);
+  const [isTestResultDialogOpen, setTestResultDialogOpen] = useState(false);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
   
   const researchPapers = React.useMemo(() => {
     const papers = new Set(questions.map(q => q.researchPaperId).filter(Boolean));
@@ -196,7 +205,7 @@ export default function UsersPage() {
         `"${user.name}"`,
         user.id,
         `"${window.location.origin}${user.quizUrl}"`,
-        user.researchPaperId
+        `"${user.researchPaperId}"`
       ].join(','))
     ].join('\n');
 
@@ -217,6 +226,29 @@ export default function UsersPage() {
       description: "User data has been exported.",
     });
   };
+
+  const handleTestAssignments = () => {
+    if (users.length === 0) {
+      toast({
+        title: "No Users",
+        description: "There are no users to test.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const questionPaperIds = new Set(questions.map(q => q.researchPaperId));
+
+    const results = users.map(user => ({
+      userName: user.name,
+      researchPaperId: user.researchPaperId,
+      hasQuestions: questionPaperIds.has(user.researchPaperId),
+    }));
+
+    setTestResults(results);
+    setTestResultDialogOpen(true);
+  };
+
 
   return (
     <div className="space-y-8">
@@ -323,6 +355,48 @@ export default function UsersPage() {
                 </CardDescription>
             </div>
             <div className="flex items-center gap-2">
+                <Dialog open={isTestResultDialogOpen} onOpenChange={setTestResultDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" onClick={handleTestAssignments} disabled={users.length === 0}>
+                            <TestTube2 className="mr-2 h-4 w-4" /> Test User Assignments
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl">
+                        <DialogHeader>
+                        <DialogTitle>User Assignment Test Results</DialogTitle>
+                        <DialogDescription>
+                            This report shows if questions are available for each user's assigned research paper.
+                        </DialogDescription>
+                        </DialogHeader>
+                        <ScrollArea className="h-96">
+                            <Table>
+                                <TableHeader>
+                                <TableRow>
+                                    <TableHead>User Name</TableHead>
+                                    <TableHead>Research Paper</TableHead>
+                                    <TableHead className="text-right">Status</TableHead>
+                                </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                {testResults.map((result, index) => (
+                                    <TableRow key={index}>
+                                    <TableCell>{result.userName}</TableCell>
+                                    <TableCell>{result.researchPaperId}</TableCell>
+                                    <TableCell className="text-right">
+                                        {result.hasQuestions ? (
+                                        <Badge className="bg-green-500 text-white"><CheckCircle className="mr-2 h-4 w-4"/>Ready</Badge>
+                                        ) : (
+                                        <Badge variant="destructive"><XCircle className="mr-2 h-4 w-4"/>No Questions</Badge>
+                                        )}
+                                    </TableCell>
+                                    </TableRow>
+                                ))}
+                                </TableBody>
+                            </Table>
+                        </ScrollArea>
+                    </DialogContent>
+                </Dialog>
+
                <Button variant="outline" onClick={handleExportUsers} disabled={users.length === 0}>
                   <Download className="mr-2 h-4 w-4" /> Export Users
                 </Button>
@@ -423,3 +497,5 @@ export default function UsersPage() {
     </div>
   );
 }
+
+    
