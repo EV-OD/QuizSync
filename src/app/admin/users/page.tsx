@@ -355,6 +355,7 @@ export default function UsersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>User Name</TableHead>
+                <TableHead>Research Paper</TableHead>
                 <TableHead>Quiz URL</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Score</TableHead>
@@ -366,6 +367,7 @@ export default function UsersPage() {
                 users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.researchPaperId}</TableCell>
                     <TableCell className="font-mono">{user.quizUrl}</TableCell>
                     <TableCell>
                       {user.completed ? (
@@ -409,7 +411,7 @@ export default function UsersPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center h-24">
+                  <TableCell colSpan={6} className="text-center h-24">
                     No users found. Upload a users CSV to get started.
                   </TableCell>
                 </TableRow>
