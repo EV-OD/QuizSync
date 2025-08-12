@@ -69,11 +69,11 @@ The admin dashboard is available at `/admin`.
 You can find sample CSV files in the `/public` directory to use as a template for populating your quiz.
 
 -   `/public/questions.csv`: Contains sample quiz questions.
-    -   **Columns**: `id`, `text`, `option1`, `option2`, `option3`, `option4`, `correctAnswer`, `researchPaperId`
-    -   The `correctAnswer` value must exactly match the text of one of the `option` columns.
+    -   **Columns**: `id`,`text`,`option1`,`option2`,`option3`,`option4`,`correctAnswer`,`researchPaperId`
+    -   **Formatting**: All columns except for `id` should be wrapped in double quotes `"`. The `correctAnswer` value must exactly match the text of one of the `option` columns.
 -   `/public/users.csv`: Contains sample user data.
-    -   **Columns**: `userId`, `userName`, `researchPaperId`
-    -   `userId` should be the participant's email address.
+    -   **Columns**: `userId`,`userName`,`researchPaperId`
+    -   **Formatting**: The `userName` and `researchPaperId` columns should be wrapped in double quotes `"`. `userId` should be the participant's email address.
 
 ## 📁 Project Structure
 

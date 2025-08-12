@@ -29,25 +29,42 @@ const parseCsvLine = (line: string): string[] => {
     const result: string[] = [];
     let currentField = '';
     let inQuotes = false;
+
     for (let i = 0; i < line.length; i++) {
         const char = line[i];
-        if (char === '"') {
-            inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-            result.push(currentField.trim());
+
+        if (char === '"' && (i === 0 || line[i-1] === ',')) {
+            inQuotes = true;
+            continue; // Skip the opening quote
+        }
+
+        if (char === '"' && (i === line.length - 1 || line[i+1] === ',')) {
+            inQuotes = false;
+            continue; // Skip the closing quote
+        }
+        
+        if (char === '"' && inQuotes && line[i+1] === '"') {
+             // Handle escaped double quote ""
+            currentField += '"';
+            i++; // Skip next quote
+            continue;
+        }
+
+        if (char === ',' && !inQuotes) {
+            result.push(currentField);
             currentField = '';
         } else {
             currentField += char;
         }
     }
-    result.push(currentField.trim());
-    return result;
+    result.push(currentField);
+    return result.map(field => field.trim());
 };
 
 
 const processQuestionsCsv = (csvContent: string): Question[] => {
     const lines = csvContent.trim().split('\n');
-    const headerLine = lines.shift();
+    const headerLine = lines.shift()?.trim();
     if (!headerLine) return [];
     
     const header = headerLine.split(',').map(h => h.trim());
@@ -67,24 +84,28 @@ const processQuestionsCsv = (csvContent: string): Question[] => {
     lines.forEach(line => {
         const data = parseCsvLine(line);
         if (data.length >= header.length) {
-            const options = optionIndices.map(index => data[index]).filter(Boolean);
-            const correctAnswerText = data[correctAnswerTextIndex];
-            const correctAnswerIndex = options.indexOf(correctAnswerText);
+            try {
+                const options = optionIndices.map(index => data[index]).filter(Boolean);
+                const correctAnswerText = data[correctAnswerTextIndex];
+                const correctAnswerIndex = options.indexOf(correctAnswerText);
 
-            if (correctAnswerIndex === -1) {
-                console.error(`Correct answer "${correctAnswerText}" not found in options for question ID ${data[idIndex]}`);
-                return;
-            }
+                if (correctAnswerIndex === -1) {
+                    console.error(`Correct answer "${correctAnswerText}" not found in options for question ID ${data[idIndex]}`);
+                    return;
+                }
 
-            questions.push({
-                id: parseInt(data[idIndex], 10),
-                text: data[textIndex],
-                options: options,
-                correctAnswer: correctAnswerIndex,
-                researchPaperId: data[researchPaperIdIndex]
-            });
+                questions.push({
+                    id: parseInt(data[idIndex], 10),
+                    text: data[textIndex],
+                    options: options,
+                    correctAnswer: correctAnswerIndex,
+                    researchPaperId: data[researchPaperIdIndex]
+                });
+             } catch (e) {
+                console.error(`Skipping malformed CSV line: ${line}`, e);
+             }
         } else {
-             console.error(`Skipping malformed CSV line: ${line}`);
+             console.error(`Skipping malformed CSV line (incorrect column count): ${line}`);
         }
     });
 
@@ -93,7 +114,7 @@ const processQuestionsCsv = (csvContent: string): Question[] => {
 
 const processUsersCsv = (csvContent: string): { users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>[] } => {
     const lines = csvContent.trim().split('\n');
-    const headerLine = lines.shift();
+    const headerLine = lines.shift()?.trim();
     if (!headerLine) return { users: [] };
     
     const header = headerLine.split(',').map(h => h.trim());
