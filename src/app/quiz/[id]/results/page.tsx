@@ -108,10 +108,10 @@ export default function ResultsPage() {
                             
                             return (
                                <div key={q.id} className="p-4 border rounded-lg select-none">
-                                 <p className="font-semibold mb-2">{index + 1}. {q.text}</p>
+                                 <p className="font-semibold mb-2 select-none">{index + 1}. {q.text}</p>
                                  <div className="space-y-2">
-                                    <p className="text-sm">Correct Answer: <span className="font-medium text-green-600">{correctAnswerText}</span></p>
-                                    <div className="flex items-center text-sm">
+                                    <p className="text-sm select-none">Correct Answer: <span className="font-medium text-green-600">{correctAnswerText}</span></p>
+                                    <div className="flex items-center text-sm select-none">
                                       Your Answer: 
                                       <span className={`ml-2 font-medium flex items-center gap-2 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
                                         {isCorrect ? <Check className="h-4 w-4"/> : <X className="h-4 w-4"/>}
@@ -127,8 +127,9 @@ export default function ResultsPage() {
                 </DialogContent>
               </Dialog>
             </div>
-            <div className="flex items-center justify-center text-xs text-muted-foreground pt-2 gap-1">
+            <div className="flex flex-col items-center justify-center text-xs text-muted-foreground pt-2 gap-1">
                <span>Organized by IEEE Computer Society Pulchowk Student Branch Chapter</span>
+               <span>Made by <a href="https://www.linkedin.com/in/rabinlc01/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Rabin</a></span>
             </div>
           </CardFooter>
         </Card>

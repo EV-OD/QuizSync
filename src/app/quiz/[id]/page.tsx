@@ -65,7 +65,6 @@ export default function QuizPage() {
 
     let score = 0;
     userQuestions.forEach(q => {
-      // Check if the stored answer index matches the correct answer index
       if (finalAnswers[q.id] !== undefined && finalAnswers[q.id] === q.correctAnswer) {
         score++;
       }
@@ -110,7 +109,6 @@ export default function QuizPage() {
      if (currentQuestionIndex < userQuestions.length - 1) {
         setCurrentQuestionIndex(i => i + 1);
     } else {
-        // This is the final question, trigger submission.
         finishQuiz(answers);
     }
   }, [currentQuestionIndex, userQuestions.length, finishQuiz, answers])
@@ -131,24 +129,6 @@ export default function QuizPage() {
 
     return () => clearInterval(timer);
   }, [status, quizScreen, handleNextQuestion]);
-  
-  
-  // Effect to automatically advance to next question after answering
-  useEffect(() => {
-      if (quizScreen !== 'playing' || userQuestions.length === 0) return;
-      
-      const answeredQuestions = Object.keys(answers).length;
-      if (answeredQuestions === 0 || answeredQuestions <= currentQuestionIndex) return;
-
-      // If the current question has been answered, move to the next one after a delay.
-      if (answers[userQuestions[currentQuestionIndex].id] !== undefined) {
-         const timeoutId = setTimeout(() => {
-              handleNextQuestion();
-         }, 300);
-         return () => clearTimeout(timeoutId);
-      }
-  }, [answers, currentQuestionIndex, userQuestions, quizScreen, handleNextQuestion]);
-
 
   // Reset question timer on new question
   useEffect(() => {
@@ -157,14 +137,18 @@ export default function QuizPage() {
 
 
   const handleAnswerSelect = (questionId: number, answerIndex: number) => {
-    if (quizScreen !== 'playing' || answers[questionId] !== undefined) return;
+    if (answers[questionId] !== undefined) return;
     
     const newAnswers = { ...answers, [questionId]: answerIndex };
     setAnswers(newAnswers);
 
-    // If this is the last question, immediately trigger the submission process.
     if (Object.keys(newAnswers).length === userQuestions.length) {
       finishQuiz(newAnswers);
+    } else {
+       const timeoutId = setTimeout(() => {
+            handleNextQuestion();
+       }, 300);
+       return () => clearTimeout(timeoutId);
     }
   };
   
@@ -236,8 +220,9 @@ export default function QuizPage() {
             <CardContent className="space-y-4">
               <p>You have already completed this quiz. You cannot take it again.</p>
             </CardContent>
-             <CardFooter className="flex flex-col justify-center text-xs text-muted-foreground pt-4">
+             <CardFooter className="flex flex-col justify-center text-xs text-muted-foreground pt-4 gap-1">
                <span>Organized by IEEE Computer Society Pulchowk Student Branch Chapter</span>
+               <span>Made by <a href="https://www.linkedin.com/in/rabinlc01/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Rabin</a></span>
              </CardFooter>
           </Card>
         </main>
@@ -258,8 +243,9 @@ export default function QuizPage() {
               <p>The quiz has not been started by the administrator yet. Please wait.</p>
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
             </CardContent>
-            <CardFooter className="flex flex-col justify-center text-xs text-muted-foreground pt-4">
+            <CardFooter className="flex flex-col justify-center text-xs text-muted-foreground pt-4 gap-1">
                <span>Organized by IEEE Computer Society Pulchowk Student Branch Chapter</span>
+               <span>Made by <a href="https://www.linkedin.com/in/rabinlc01/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Rabin</a></span>
             </CardFooter>
           </Card>
         </main>
@@ -292,8 +278,9 @@ export default function QuizPage() {
               <p>Preparing your questions. This may take a moment.</p>
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
             </CardContent>
-             <CardFooter className="flex flex-col justify-center text-xs text-muted-foreground pt-4">
+             <CardFooter className="flex flex-col justify-center text-xs text-muted-foreground pt-4 gap-1">
                <span>Organized by IEEE Computer Society Pulchowk Student Branch Chapter</span>
+               <span>Made by <a href="https://www.linkedin.com/in/rabinlc01/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Rabin</a></span>
              </CardFooter>
           </Card>
         </main>
@@ -405,7 +392,7 @@ export default function QuizPage() {
                                 className="flex items-center space-x-4 p-3 md:p-4 rounded-lg border bg-background hover:bg-accent/50 has-[input:checked]:bg-accent has-[input:checked]:border-accent-foreground cursor-pointer transition-colors select-none"
                             >
                                 <RadioGroupItem value={index.toString()} id={`option-${index}`} className="h-5 w-5"/>
-                                <span className="text-sm md:text-base font-medium">{option}</span>
+                                <span className="text-sm md:text-base font-medium select-none">{option}</span>
                             </Label>
                           ))}
                         </RadioGroup>
