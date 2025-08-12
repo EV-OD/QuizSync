@@ -386,7 +386,7 @@ export default function QuizPage() {
                  >
                     <Card className="shadow-lg">
                       <CardHeader className="relative border-b p-4 md:p-6">
-                        <CardTitle className="font-headline text-xl md:text-2xl pr-16 md:pr-20">{currentQuestion.text}</CardTitle>
+                        <CardTitle className="font-headline text-xl md:text-2xl pr-16 md:pr-20 select-none">{currentQuestion.text}</CardTitle>
                          <div className="absolute top-3 right-3 md:top-4 md:right-4 bg-primary text-primary-foreground rounded-full h-12 w-12 md:h-16 md:w-16 flex items-center justify-center font-bold text-xl md:text-2xl font-mono shadow-inner">
                             {timeLeft}
                         </div>
@@ -402,7 +402,7 @@ export default function QuizPage() {
                              <Label 
                                 htmlFor={`option-${index}`} 
                                 key={index}
-                                className="flex items-center space-x-4 p-3 md:p-4 rounded-lg border bg-background hover:bg-accent/50 has-[input:checked]:bg-accent has-[input:checked]:border-accent-foreground cursor-pointer transition-colors"
+                                className="flex items-center space-x-4 p-3 md:p-4 rounded-lg border bg-background hover:bg-accent/50 has-[input:checked]:bg-accent has-[input:checked]:border-accent-foreground cursor-pointer transition-colors select-none"
                             >
                                 <RadioGroupItem value={index.toString()} id={`option-${index}`} className="h-5 w-5"/>
                                 <span className="text-sm md:text-base font-medium">{option}</span>

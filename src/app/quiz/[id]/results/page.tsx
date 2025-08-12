@@ -107,7 +107,7 @@ export default function ResultsPage() {
                             const isCorrect = isAnswered && userAnswerIndex === q.correctAnswer;
                             
                             return (
-                               <div key={q.id} className="p-4 border rounded-lg">
+                               <div key={q.id} className="p-4 border rounded-lg select-none">
                                  <p className="font-semibold mb-2">{index + 1}. {q.text}</p>
                                  <div className="space-y-2">
                                     <p className="text-sm">Correct Answer: <span className="font-medium text-green-600">{correctAnswerText}</span></p>
