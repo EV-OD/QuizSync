@@ -24,9 +24,33 @@ const generateQuizId = () => {
     return `${part1}${part2}`;
 }
 
+
+const parseCsvLine = (line: string): string[] => {
+    const result: string[] = [];
+    let currentField = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(currentField.trim());
+            currentField = '';
+        } else {
+            currentField += char;
+        }
+    }
+    result.push(currentField.trim());
+    return result;
+};
+
+
 const processQuestionsCsv = (csvContent: string): Question[] => {
     const lines = csvContent.trim().split('\n');
-    const header = lines[0].split(',').map(h => h.trim());
+    const headerLine = lines.shift();
+    if (!headerLine) return [];
+    
+    const header = headerLine.split(',').map(h => h.trim());
     const questions: Question[] = [];
 
     const idIndex = header.indexOf('id');
@@ -39,9 +63,9 @@ const processQuestionsCsv = (csvContent: string): Question[] => {
         console.error("CSV header is missing one of id, text, correctAnswer, researchPaperId or options columns.");
         return [];
     }
-
-    for (let i = 1; i < lines.length; i++) {
-        const data = lines[i].split(',').map(d => d.trim());
+    
+    lines.forEach(line => {
+        const data = parseCsvLine(line);
         if (data.length >= header.length) {
             const options = optionIndices.map(index => data[index]).filter(Boolean);
             const correctAnswerText = data[correctAnswerTextIndex];
@@ -49,7 +73,7 @@ const processQuestionsCsv = (csvContent: string): Question[] => {
 
             if (correctAnswerIndex === -1) {
                 console.error(`Correct answer "${correctAnswerText}" not found in options for question ID ${data[idIndex]}`);
-                continue;
+                return;
             }
 
             questions.push({
@@ -59,14 +83,20 @@ const processQuestionsCsv = (csvContent: string): Question[] => {
                 correctAnswer: correctAnswerIndex,
                 researchPaperId: data[researchPaperIdIndex]
             });
+        } else {
+             console.error(`Skipping malformed CSV line: ${line}`);
         }
-    }
+    });
+
     return questions;
 };
 
 const processUsersCsv = (csvContent: string): { users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>[] } => {
     const lines = csvContent.trim().split('\n');
-    const header = lines[0].split(',').map(h => h.trim());
+    const headerLine = lines.shift();
+    if (!headerLine) return { users: [] };
+    
+    const header = headerLine.split(',').map(h => h.trim());
     const users: Omit<User, 'quizUrl' | 'score' | 'completed' | 'totalQuestions' | 'quizId'>[] = [];
 
     const userIdIndex = header.indexOf('userId');
@@ -78,8 +108,8 @@ const processUsersCsv = (csvContent: string): { users: Omit<User, 'quizUrl' | 's
       return { users: [] };
     }
 
-    for (let i = 1; i < lines.length; i++) {
-        const data = lines[i].split(',');
+    lines.forEach(line => {
+         const data = parseCsvLine(line);
          if (data.length >= header.length) {
             const userId = data[userIdIndex].trim();
             const userName = data[userNameIndex].trim();
@@ -91,7 +121,7 @@ const processUsersCsv = (csvContent: string): { users: Omit<User, 'quizUrl' | 's
                 researchPaperId: researchPaperId,
             });
         }
-    }
+    });
     return { users };
 };
 
@@ -114,12 +144,12 @@ export const store = {
                 id: doc.id,
                 quizUrl: `/quiz/${data.quizId}`
             }
-        }) as User[];
+        }).sort((a, b) => a.name.localeCompare(b.name)) as User[];
         state = { ...state, users };
         notify();
       }),
       onSnapshot(collection(db, 'questions'), (snapshot) => {
-        const questions = snapshot.docs.map(doc => doc.data()) as Question[];
+        const questions = snapshot.docs.map(doc => doc.data()).sort((a, b) => a.id - b.id) as Question[];
         state = { ...state, questions };
         notify();
       }),
