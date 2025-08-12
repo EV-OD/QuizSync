@@ -221,11 +221,12 @@ export default function Home() {
 
 
         </main>
-        <footer className="flex items-center justify-center py-6 border-t border-border bg-muted/40 text-muted-foreground">
+        <footer className="flex flex-col items-center justify-center gap-2 py-6 border-t border-border bg-muted/40 text-muted-foreground">
           <p className="text-xs">&copy; 2024 Scholars in the Making. All rights reserved.</p>
+          <p className="text-xs">
+            Made by <a href="https://www.linkedin.com/in/rabinlc01/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Rabin</a>
+          </p>
         </footer>
       </div>
   );
 }
-
-    
