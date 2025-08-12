@@ -1,5 +1,5 @@
 userId,userName,researchPaperId
-participant1@example.com,"Alice Johnson","The Future of AI in Renewable Energy"
-participant2@example.com,"Bob Williams","The Future of AI in Renewable Energy"
-participant3@example.com,"Charlie Brown","Quantum Computing's Impact on Cryptography"
-participant4@example.com,"Diana Miller","Quantum Computing's Impact on Cryptography"
+participant1@email.com,"Alice Johnson","The Future of AI in Renewable Energy"
+participant2@email.com,"Bob Williams","Quantum Computing's Impact on Cryptography"
+participant3@email.com,"Charlie Brown","The Future of AI in Renewable Energy"
+participant4@email.com,"Davis, Diana","Quantum Computing's Impact on Cryptography"
